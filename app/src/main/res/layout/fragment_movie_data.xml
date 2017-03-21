@@ -1,0 +1,52 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="mahmoud.com.popularmovies.MovieDataFragment"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/movie_data_title"
+        android:textAppearance="@style/TextAppearance.AppCompat.Title"
+        android:textAllCaps="true"
+        android:padding="16dp"
+        android:background="@color/colorAccent"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/movie_data_poster"
+            android:minWidth="150dp"
+            android:minHeight="200dp"
+            android:layout_marginRight="16dp"/>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/movie_data_date"
+                android:textAppearance="@style/TextAppearance.AppCompat.Title"
+                android:padding="5dp"
+                android:fontFamily="sans-serif-thin"/>
+            <TextView
+                android:layout_marginTop="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/movie_data_rating"
+                android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+                android:padding="5dp"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+</LinearLayout>
