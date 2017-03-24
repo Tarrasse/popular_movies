@@ -20,7 +20,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MovieDataActivity"></activity>
+        <activity android:name=".MovieDataActivity" />
+
+        <provider
+            android:name=".data.MoviesContentProvider"
+            android:authorities="mahmoud.com.popularmovies"
+            android:enabled="true"
+            android:exported="true"></provider>
     </application>
 
 </manifest>

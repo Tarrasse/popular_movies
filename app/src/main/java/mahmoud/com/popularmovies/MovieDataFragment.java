@@ -27,6 +27,7 @@ public class MovieDataFragment extends Fragment {
     private TextView dateTextView;
     private TextView ratingTextView;
     private ImageView posterImageView;
+    private TextView descTextView;
 
     private MoviesModule.Movie mMovie;
 
@@ -55,11 +56,15 @@ public class MovieDataFragment extends Fragment {
         dateTextView = (TextView) rootView.findViewById(R.id.movie_data_date);
         ratingTextView = (TextView) rootView.findViewById(R.id.movie_data_rating);
         posterImageView = (ImageView) rootView.findViewById(R.id.movie_data_poster);
+        descTextView = (TextView) rootView.findViewById(R.id.movie_data_desc_textView);
+
         String title = mMovie.getTitle();
         String date = mMovie.getRelease_date().substring(0, 4);
         String rating = String.valueOf(mMovie.getVote_average()) + " / 10";
         String posterPath = mMovie.getPoster_path();
+        String desc = mMovie.getOverview();
 
+        descTextView.setText(desc);
         titleTextView.setText(title);
         dateTextView.setText(date);
         ratingTextView.setText(rating);

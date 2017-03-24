@@ -10,6 +10,7 @@ import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -38,10 +39,18 @@ import mahmoud.com.popularmovies.modules.MoviesModule;
 
 public class MoviesListFragment extends Fragment {
 
+    private static final String SAVED_MOVIE_MODULE = "saved_movie_module";
+    private static final String TAG = MoviesListFragment.class.getSimpleName();
+    private static final int LOADER_FLAG = 0;
     private RecyclerView mRecyclerView;
     private MoviesListAdapter mlistAdapter;
+    private MoviesModule mMoviesModule;
 
     private ProgressDialog dialog;
+
+    private GetMoviesTask task;
+
+
 
     public MoviesListFragment() {
         // Required empty public constructor
@@ -56,13 +65,14 @@ public class MoviesListFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+
+
         View rootView = inflater.inflate(R.layout.fragment_movies_list, container, false);
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.movies_list_recyclerView);
         mlistAdapter = new MoviesListAdapter(getActivity(), null, null);
@@ -74,13 +84,52 @@ public class MoviesListFragment extends Fragment {
         dialog.setTitle("LOADING");
         dialog.setMessage("please wait loading movies data ... ");
 
-        new GetMoviesTask().execute();
-
+        task = new GetMoviesTask();
+        if (savedInstanceState == null){
+            task.execute();
+        }else {
+            mMoviesModule = (MoviesModule) savedInstanceState.getSerializable(SAVED_MOVIE_MODULE);
+            if (mMoviesModule != null)
+                updateUIComponents(mMoviesModule);
+        }
         return rootView;
     }
 
-    public void updateUI(){
+    private void updateUI(){
         new GetMoviesTask().execute();
+    }
+
+    private void updateUIComponents(final MoviesModule moviesModule){
+        mlistAdapter = new MoviesListAdapter(getActivity(), new ArrayList(moviesModule.getResults()), new MoviesListAdapter.ItemClickListner() {
+            @Override
+            public void OnItemClick(View v, int position) {
+                Log.i(TAG, position + " is clicked");
+
+
+                Intent intent = new Intent(getActivity(), MovieDataActivity.class);
+                MoviesModule.Movie movie = moviesModule.getResults().get(position);
+                intent.putExtra(MovieDataActivity.Movie_EXTRA, (Serializable) movie);
+                startActivity(intent);
+            }
+        });
+        mRecyclerView.setAdapter(mlistAdapter);
+        Log.i(TAG, String.valueOf(moviesModule.getResults().size()));
+    }
+
+
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (!task.isCancelled())
+            task.cancel(true);
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        if (!task.isCancelled())
+            task.cancel(true);
     }
 
     class GetMoviesTask extends AsyncTask<String,String,String>{
@@ -140,20 +189,8 @@ public class MoviesListFragment extends Fragment {
             if (s != null){
                 Gson gson = new Gson();
                 final MoviesModule moviesModule = gson.fromJson(s, MoviesModule.class);
-                mlistAdapter = new MoviesListAdapter(getActivity(), new ArrayList(moviesModule.getResults()), new MoviesListAdapter.ItemClickListner() {
-                    @Override
-                    public void OnItemClick(View v, int position) {
-                        Log.i(TAG, position + " is clicked");
-
-
-                        Intent intent = new Intent(getActivity(), MovieDataActivity.class);
-                        MoviesModule.Movie movie = moviesModule.getResults().get(position);
-                        intent.putExtra(MovieDataActivity.Movie_EXTRA, (Serializable) movie);
-                        startActivity(intent);
-                    }
-                });
-                mRecyclerView.setAdapter(mlistAdapter);
-                Log.i(TAG, String.valueOf(moviesModule.getResults().size()));
+                mMoviesModule = moviesModule;
+                updateUIComponents(moviesModule);
                 dialog.dismiss();
             }else{
                 dialog.dismiss();
@@ -164,7 +201,6 @@ public class MoviesListFragment extends Fragment {
         }
     }
 
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         Log.i("Movies fragment", "switching");
@@ -172,4 +208,9 @@ public class MoviesListFragment extends Fragment {
         return true;
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putSerializable(SAVED_MOVIE_MODULE, mMoviesModule);
+    }
 }
