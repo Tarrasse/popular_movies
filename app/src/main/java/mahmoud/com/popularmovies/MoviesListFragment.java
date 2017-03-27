@@ -147,7 +147,7 @@ public class MoviesListFragment extends Fragment {
             try {
                 String type = PreferenceManager
                         .getDefaultSharedPreferences(getActivity())
-                        .getString(Utilty.PREF_SORT_TYPE, null);
+                        .getString(Utilty.PREF_SORT_TYPE, Utilty.POPULAR);
                 Uri.Builder builder = new Uri.Builder();
                 builder.scheme("https")
                         .authority(Utilty.BASE_IMDB_URL)

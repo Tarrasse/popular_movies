@@ -1,5 +1,8 @@
 package mahmoud.com.popularmovies;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.content.Context;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
@@ -11,8 +14,14 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import mahmoud.com.popularmovies.modules.MoviesModule;
+import mahmoud.com.popularmovies.sync.MoviesSyncAdapter;
+
 public class MoviesListActivity extends AppCompatActivity {
 
+    final String AUTHORITY = "mahmoud.com.popularmovies";
+    final String ACCOUNT_TYPE = "mahmoud.com.popularmovies";
+    final String ACCOUNT = "syncAdapterAccount";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,6 +29,8 @@ public class MoviesListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_movies_list);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        MoviesSyncAdapter.initializeSyncAdapter(this);
 
         getSupportFragmentManager()
                 .beginTransaction()
