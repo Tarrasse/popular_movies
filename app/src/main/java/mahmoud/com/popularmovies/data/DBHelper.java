@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
  * Created by mahmoud on 3/24/2017.
  */
 public class DBHelper extends SQLiteOpenHelper{
-    public static final String MOVIES_DB_NAME = "movies.db";
+    public static final String MOVIES_DB_NAME = "moviesdatabase.db";
     private static final int VERSION = 1;
 
     private final String CREATE_TABLE_POPULAR = "CREATE TABLE " + MoviesContract.PopularTable.TABLE_NAME +

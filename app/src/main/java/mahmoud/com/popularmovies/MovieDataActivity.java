@@ -17,13 +17,14 @@ public class MovieDataActivity extends AppCompatActivity {
         setContentView(R.layout.activity_movie_data);
 
         Intent income = getIntent();
-        MoviesModule.Movie movie = (MoviesModule.Movie) income.getSerializableExtra(MovieDataActivity.Movie_EXTRA);
 
-        Bundle aregs = new Bundle();
-        aregs.putSerializable(Movie_EXTRA, movie);
+        Bundle args = new Bundle();
+        args.putString(Utilty.DATA_FRAGMENT_BUNDLE_SORT_TYPE, income.getStringExtra(Utilty.DATA_FRAGMENT_BUNDLE_SORT_TYPE));
+        args.putLong(Utilty.DATA_FRAGMENT_BUNDLE__ID, income.getLongExtra(Utilty.DATA_FRAGMENT_BUNDLE__ID, 0));
+        args.putString(Utilty.DATA_FRAGMENT_BUNDLE_MOVIE_id, income.getStringExtra(Utilty.DATA_FRAGMENT_BUNDLE_MOVIE_id));
 
         MovieDataFragment fragment = new MovieDataFragment();
-        fragment.setArguments(aregs);
+        fragment.setArguments(args);
 
         getSupportFragmentManager()
                 .beginTransaction()

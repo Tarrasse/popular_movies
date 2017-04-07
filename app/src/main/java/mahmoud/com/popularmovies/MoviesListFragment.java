@@ -1,8 +1,10 @@
 package mahmoud.com.popularmovies;
 
 import android.app.ProgressDialog;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -11,6 +13,8 @@ import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -35,6 +39,7 @@ import java.util.ArrayList;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import mahmoud.com.popularmovies.data.MoviesContract;
 import mahmoud.com.popularmovies.modules.MoviesModule;
 
 public class MoviesListFragment extends Fragment {
@@ -44,11 +49,8 @@ public class MoviesListFragment extends Fragment {
     private static final int LOADER_FLAG = 0;
     private RecyclerView mRecyclerView;
     private MoviesListAdapter mlistAdapter;
-    private MoviesModule mMoviesModule;
 
-    private ProgressDialog dialog;
-
-    private GetMoviesTask task;
+    private MoviesListAdapter.ItemClickListner listner;
 
 
 
@@ -65,6 +67,7 @@ public class MoviesListFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        getLoaderManager().initLoader(LOADER_FLAG, null,loaderCallbacks);
     }
 
     @Override
@@ -75,142 +78,86 @@ public class MoviesListFragment extends Fragment {
 
         View rootView = inflater.inflate(R.layout.fragment_movies_list, container, false);
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.movies_list_recyclerView);
-        mlistAdapter = new MoviesListAdapter(getActivity(), null, null);
+        mlistAdapter = new MoviesListAdapter(getActivity(), null, new MoviesListAdapter.ItemClickListner() {
+            @Override
+            public void OnItemClick(View v, int position, String movieId, int _id) {
+
+                listner.OnItemClick(v, position, movieId, _id);
+            }
+
+        });
+
         mRecyclerView.setAdapter(mlistAdapter);
         mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 2));
 
-        dialog = new ProgressDialog(getActivity());
-        dialog.setCancelable(false);
-        dialog.setTitle("LOADING");
-        dialog.setMessage("please wait loading movies data ... ");
 
-        task = new GetMoviesTask();
-        if (savedInstanceState == null){
-            task.execute();
-        }else {
-            mMoviesModule = (MoviesModule) savedInstanceState.getSerializable(SAVED_MOVIE_MODULE);
-            if (mMoviesModule != null)
-                updateUIComponents(mMoviesModule);
-        }
+
         return rootView;
-    }
-
-    private void updateUI(){
-        new GetMoviesTask().execute();
-    }
-
-    private void updateUIComponents(final MoviesModule moviesModule){
-        mlistAdapter = new MoviesListAdapter(getActivity(), new ArrayList(moviesModule.getResults()), new MoviesListAdapter.ItemClickListner() {
-            @Override
-            public void OnItemClick(View v, int position) {
-                Log.i(TAG, position + " is clicked");
-
-
-                Intent intent = new Intent(getActivity(), MovieDataActivity.class);
-                MoviesModule.Movie movie = moviesModule.getResults().get(position);
-                intent.putExtra(MovieDataActivity.Movie_EXTRA, (Serializable) movie);
-                startActivity(intent);
-            }
-        });
-        mRecyclerView.setAdapter(mlistAdapter);
-        Log.i(TAG, String.valueOf(moviesModule.getResults().size()));
-    }
-
-
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        if (!task.isCancelled())
-            task.cancel(true);
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        if (!task.isCancelled())
-            task.cancel(true);
-    }
-
-    class GetMoviesTask extends AsyncTask<String,String,String>{
-
-        private final String TAG = GetMoviesTask.class.getSimpleName();
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            dialog.show();
-        }
-
-        @Override
-        protected String doInBackground(String... strings) {
-            try {
-                String type = PreferenceManager
-                        .getDefaultSharedPreferences(getActivity())
-                        .getString(Utilty.PREF_SORT_TYPE, Utilty.POPULAR);
-                Uri.Builder builder = new Uri.Builder();
-                builder.scheme("https")
-                        .authority(Utilty.BASE_IMDB_URL)
-                        .appendPath("3")
-                        .appendPath("movie")
-                        .appendPath(type)
-                        .appendQueryParameter("api_key", BuildConfig.API_KEY);
-
-                Log.i(TAG, builder.build().toString());
-
-                URL url = new URL(builder.build().toString());
-                HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-                conn.setRequestMethod("GET");
-                conn.setDoInput(true);
-
-                InputStream is = conn.getInputStream();
-                BufferedReader rd = new BufferedReader(new InputStreamReader(is));
-                String line;
-                StringBuilder response = new StringBuilder();
-                while ((line = rd.readLine()) != null) {
-                    response.append(line);
-                    response.append('\n');
-                }
-
-                rd.close();
-                Log.i(TAG, "res : " + response.toString());
-                return response.toString();
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            super.onPostExecute(s);
-            if (s != null){
-                Gson gson = new Gson();
-                final MoviesModule moviesModule = gson.fromJson(s, MoviesModule.class);
-                mMoviesModule = moviesModule;
-                updateUIComponents(moviesModule);
-                dialog.dismiss();
-            }else{
-                dialog.dismiss();
-                Toast.makeText(getActivity(), "No Internet Connection", Toast.LENGTH_LONG).show();
-            }
-
-            //TODO: do something when no internet connection
-        }
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        Log.i("Movies fragment", "switching");
-        updateUI();
+        Log.i(TAG, "switching");
+        getLoaderManager().restartLoader(LOADER_FLAG, null, loaderCallbacks);
         return true;
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putSerializable(SAVED_MOVIE_MODULE, mMoviesModule);
+    }
+
+
+    LoaderManager.LoaderCallbacks<Cursor> loaderCallbacks = new LoaderManager.LoaderCallbacks<Cursor>() {
+        @Override
+        public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+            Log.i(TAG, "creating loader");
+
+            String type = PreferenceManager
+                    .getDefaultSharedPreferences(getContext())
+                    .getString(Utilty.PREF_SORT_TYPE, Utilty.POPULAR);
+
+            if (type.equals(Utilty.TOP_RATED)){
+                Log.i(TAG, MoviesContract.TopRatedTable.CONTENT_URI.toString());
+                return new CursorLoader(getContext(),
+                        MoviesContract.TopRatedTable.CONTENT_URI,
+                        null,
+                        null,
+                        null,
+                        null);
+            }else if(type.equals(Utilty.FAVOURITE)){
+                Log.i(TAG, MoviesContract.FavouriteTable.CONTENT_URI.toString());
+                return new CursorLoader(getContext(),
+                        MoviesContract.FavouriteTable.CONTENT_URI,
+                        null,
+                        null,
+                        null,
+                        null);
+            }else {
+                Log.i(TAG, MoviesContract.PopularTable.CONTENT_URI.toString());
+                return new CursorLoader(getContext(),
+                        MoviesContract.PopularTable.CONTENT_URI,
+                        null,
+                        null,
+                        null,
+                        null);
+            }
+        }
+
+        @Override
+        public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+            Log.i(TAG, "content loaded");
+            Log.i(TAG, String.valueOf(data.getCount()));
+            mlistAdapter.swapCursor(data);
+        }
+
+        @Override
+        public void onLoaderReset(Loader<Cursor> loader) {
+            mlistAdapter.swapCursor(null);
+        }
+    };
+
+    public void setListner(MoviesListAdapter.ItemClickListner listner) {
+        this.listner = listner;
     }
 }

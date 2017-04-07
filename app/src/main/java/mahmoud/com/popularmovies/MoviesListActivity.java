@@ -1,27 +1,21 @@
 package mahmoud.com.popularmovies;
 
-import android.accounts.Account;
-import android.accounts.AccountManager;
-import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
-import mahmoud.com.popularmovies.modules.MoviesModule;
 import mahmoud.com.popularmovies.sync.MoviesSyncAdapter;
 
 public class MoviesListActivity extends AppCompatActivity {
 
-    final String AUTHORITY = "mahmoud.com.popularmovies";
-    final String ACCOUNT_TYPE = "mahmoud.com.popularmovies";
-    final String ACCOUNT = "syncAdapterAccount";
+    private static final String TAG = MoviesListActivity.class.getSimpleName();
+    private boolean twoBane = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,9 +26,50 @@ public class MoviesListActivity extends AppCompatActivity {
 
         MoviesSyncAdapter.initializeSyncAdapter(this);
 
+        if(findViewById(R.id.movie_data_palce_holder) != null){
+            twoBane = true;
+        }else{
+            twoBane = false;
+        }
+
+        MoviesListFragment fragment = new MoviesListFragment();
+        fragment.setListner(new MoviesListAdapter.ItemClickListner() {
+            @Override
+            public void OnItemClick(View v, int position, String movieId, int _id) {
+                String type = PreferenceManager
+                        .getDefaultSharedPreferences(getBaseContext())
+                        .getString(Utilty.PREF_SORT_TYPE, Utilty.POPULAR);
+                if(twoBane){
+                    Bundle args = new Bundle();
+                    args.putString(Utilty.DATA_FRAGMENT_BUNDLE_SORT_TYPE, type);
+                    args.putLong(Utilty.DATA_FRAGMENT_BUNDLE__ID,(long) _id);
+                    args.putString(Utilty.DATA_FRAGMENT_BUNDLE_MOVIE_id,movieId);
+
+                    MovieDataFragment fragment = new MovieDataFragment();
+                    fragment.setArguments(args);
+
+                    getSupportFragmentManager()
+                            .beginTransaction()
+                            .replace(R.id.movie_data_palce_holder, fragment)
+                            .commit();
+
+                    Log.i(TAG, "twoBane");
+                }else{
+                    Intent intent = new Intent(getBaseContext(), MovieDataActivity.class);
+
+
+                    intent.putExtra(Utilty.DATA_FRAGMENT_BUNDLE_SORT_TYPE, type);
+                    intent.putExtra(Utilty.DATA_FRAGMENT_BUNDLE__ID, (long) _id);
+                    intent.putExtra(Utilty.DATA_FRAGMENT_BUNDLE_MOVIE_id, movieId);
+                    startActivity(intent);
+                }
+
+            }
+        });
+
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.movies_list_fragment_palce_holder, new MoviesListFragment())
+                .replace(R.id.movies_list_fragment_palce_holder, fragment)
                 .commit();
     }
 
@@ -64,6 +99,11 @@ public class MoviesListActivity extends AppCompatActivity {
             PreferenceManager.getDefaultSharedPreferences(this)
                     .edit()
                     .putString(Utilty.PREF_SORT_TYPE, Utilty.TOP_RATED)
+                    .apply();
+        }else if(id == R.id.action_Favourite){
+            PreferenceManager.getDefaultSharedPreferences(this)
+                    .edit()
+                    .putString(Utilty.PREF_SORT_TYPE, Utilty.FAVOURITE)
                     .apply();
         }
 

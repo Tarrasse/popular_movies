@@ -85,10 +85,18 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
                         MoviesModule moviesModule = gson.fromJson(response, MoviesModule.class);
                         if(moviesModule != null && moviesModule.getResults()!= null){
                             List movies = moviesModule.getResults();
+                            Log.i(TAG, String.valueOf(movies.size()));
+                            getContext().getContentResolver().delete(MoviesContract.PopularTable.CONTENT_URI, null,null);
                             for (int i = 0; i < movies.size(); i++) {
                                 MoviesModule.Movie movie = (MoviesModule.Movie) movies.get(i);
                                 ContentValues values = new ContentValues();
-//                                values.put();
+                                values.put(MoviesContract.PopularTable.TITLE, movie.getTitle());
+                                values.put(MoviesContract.PopularTable.OVERVIEW, movie.getOverview());
+                                values.put(MoviesContract.PopularTable.POSTER_PATH, movie.getPoster_path());
+                                values.put(MoviesContract.PopularTable.VOTE, movie.getVote_average());
+                                values.put(MoviesContract.PopularTable.RELEASE_DATE, movie.getRelease_date());
+                                values.put(MoviesContract.PopularTable.ID, String.valueOf(movie.getId()));
+                                getContext().getContentResolver().insert(MoviesContract.PopularTable.CONTENT_URI, values);
                             }
                         }
                         // TODO: insert result into the DB
@@ -99,7 +107,7 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-
+                Log.i(TAG, "error");
             }
 
         });
@@ -123,14 +131,28 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
                         Gson gson = new Gson();
                         MoviesModule moviesModule = gson.fromJson(response, MoviesModule.class);
 
-                        // TODO: insert result into the DB
+                        if(moviesModule != null && moviesModule.getResults()!= null){
+                            List movies = moviesModule.getResults();
+                            getContext().getContentResolver().delete(MoviesContract.TopRatedTable.CONTENT_URI, null,null);
+                            for (int i = 0; i < movies.size(); i++) {
+                                MoviesModule.Movie movie = (MoviesModule.Movie) movies.get(i);
+                                ContentValues values = new ContentValues();
+                                values.put(MoviesContract.PopularTable.TITLE, movie.getTitle());
+                                values.put(MoviesContract.PopularTable.OVERVIEW, movie.getOverview());
+                                values.put(MoviesContract.PopularTable.POSTER_PATH, movie.getPoster_path());
+                                values.put(MoviesContract.PopularTable.VOTE, movie.getVote_average());
+                                values.put(MoviesContract.PopularTable.RELEASE_DATE, movie.getRelease_date());
+                                values.put(MoviesContract.PopularTable.ID, String.valueOf(movie.getId()));
+                                getContext().getContentResolver().insert(MoviesContract.TopRatedTable.CONTENT_URI, values);
+                            }
+                        }
 
                         Log.i(TAG, "data loaded");
                     }
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-
+                Log.i(TAG, "error");
             }
 
         });

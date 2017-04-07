@@ -12,12 +12,10 @@ public class Utilty {
     public static String BASE_IMDB_IMG_URL = "http://image.tmdb.org/t/p/w185/";
     public static String CONTENT_AUTHORITY = "mahmoud.com.popularmovies";
 
-    public static final String BUNDLE_KEY_TITLE = "title";
-    public static final String BUNDLE_KEY_POSTER = "poster";
-    public static final String BUNDLE_KEY_DATE = "date";
-    public static final String BUNDLE_KEY_RATE = "rate";
-    public static final String BUNDLE_KEY_ID = "id";
 
+    public static String DATA_FRAGMENT_BUNDLE_SORT_TYPE = "data_fragment_type";
+    public static String DATA_FRAGMENT_BUNDLE__ID = "_id";
+    public static String DATA_FRAGMENT_BUNDLE_MOVIE_id = "id";
 
 
 }

@@ -6,10 +6,11 @@
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="mahmoud.com.popularmovies.MoviesListActivity"
-    tools:showIn="@layout/activity_movies_list">
+    tools:showIn="@layout/activity_movies_list"
+    >
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/movies_list_fragment_palce_holder"></FrameLayout>
+        android:id="@+id/movies_list_fragment_palce_holder"/>
 </RelativeLayout>

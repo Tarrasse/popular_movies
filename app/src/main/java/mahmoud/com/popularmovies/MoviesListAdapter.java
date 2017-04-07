@@ -1,6 +1,7 @@
 package mahmoud.com.popularmovies;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,6 +15,7 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 
+import mahmoud.com.popularmovies.data.MoviesContract;
 import mahmoud.com.popularmovies.modules.MoviesModule;
 
 /**
@@ -21,11 +23,11 @@ import mahmoud.com.popularmovies.modules.MoviesModule;
  */
 public class MoviesListAdapter extends RecyclerView.Adapter<MoviesListAdapter.MoviesListViewHolder> {
     private static final String TAG = MoviesListAdapter.class.getSimpleName();
-    private List<MoviesModule.Movie> moviesList;
+    private Cursor moviesList;
     private Context mContext;
     private ItemClickListner listner;
 
-    public MoviesListAdapter(Context context, ArrayList moviesList, ItemClickListner listner) {
+    public MoviesListAdapter(Context context, Cursor moviesList, ItemClickListner listner) {
         this.moviesList = moviesList;
         this.mContext = context;
         this.listner = listner;
@@ -35,10 +37,14 @@ public class MoviesListAdapter extends RecyclerView.Adapter<MoviesListAdapter.Mo
     public MoviesListViewHolder onCreateViewHolder(final ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.movie_list_item, parent, false);
+
         itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                listner.OnItemClick(view, parent.indexOfChild(view));
+                moviesList.moveToPosition(parent.indexOfChild(view));
+                String movieId = moviesList.getString(moviesList.getColumnIndex(MoviesContract.PopularTable.ID));
+                int _id = moviesList.getInt(moviesList.getColumnIndex(MoviesContract.PopularTable._ID));
+                listner.OnItemClick(view, parent.indexOfChild(view), movieId, _id);
             }
         });
 
@@ -47,17 +53,19 @@ public class MoviesListAdapter extends RecyclerView.Adapter<MoviesListAdapter.Mo
 
     @Override
     public void onBindViewHolder(MoviesListViewHolder holder, int position) {
-        MoviesModule.Movie movie = moviesList.get(position);
-        String url = Utilty.BASE_IMDB_IMG_URL + movie.getPoster_path();
+        moviesList.moveToPosition(position);
+        String posterPath = moviesList.getString(moviesList.getColumnIndex(MoviesContract.PopularTable.POSTER_PATH));
+
+        String url = Utilty.BASE_IMDB_IMG_URL + posterPath;
         Log.i(TAG, url);
-        Picasso.with(mContext).load(Utilty.BASE_IMDB_IMG_URL + movie.getPoster_path()).into(holder.posterImageView);
+        Picasso.with(mContext).load(Utilty.BASE_IMDB_IMG_URL + posterPath).into(holder.posterImageView);
     }
 
     @Override
     public int getItemCount() {
         if (moviesList == null)
             return 0;
-        return moviesList.size();
+        return moviesList.getCount();
     }
 
     public class MoviesListViewHolder extends RecyclerView.ViewHolder {
@@ -70,9 +78,16 @@ public class MoviesListAdapter extends RecyclerView.Adapter<MoviesListAdapter.Mo
         }
     }
 
-    public interface ItemClickListner{
-        public void OnItemClick(View v, int position);
+    public void swapCursor(Cursor newCursor){
+        moviesList = newCursor;
+        notifyDataSetChanged();
     }
+
+    public interface ItemClickListner{
+        public void OnItemClick(View v, int position, String movieId, int _id);
+    }
+
+
 
 }
 

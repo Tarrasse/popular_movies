@@ -7,6 +7,7 @@ import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.util.Log;
 
 import mahmoud.com.popularmovies.modules.MoviesModule;
 
@@ -39,8 +40,9 @@ public class MoviesContentProvider extends ContentProvider {
     }
 
     public MoviesContentProvider() {
-        dbHelper = new DBHelper(getContext());
+
     }
+
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
@@ -56,8 +58,13 @@ public class MoviesContentProvider extends ContentProvider {
                 num = db.delete(MoviesContract.PopularTable.TABLE_NAME, null, null);
                 break;
             case FAVOURITE:
+                long id = ContentUris.parseId(uri);
+                num = db.delete(MoviesContract.FavouriteTable.TABLE_NAME,
+                        MoviesContract.FavouriteTable._ID +'='+id,
+                        null);
+                break;
             case ALL_FAVOURITE:
-                num = db.delete(MoviesContract.PopularTable.TABLE_NAME, null, null);
+                num = db.delete(MoviesContract.FavouriteTable.TABLE_NAME, null, null);
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -99,8 +106,13 @@ public class MoviesContentProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
-        // TODO: Implement this to initialize your content provider on startup.
-        return false;
+        if (getContext() == null) {
+            Log.i("MoviesContentProvider", "context  = null");
+        }else {
+            Log.i("MoviesContentProvider", "context  != null");
+        }
+        dbHelper = new DBHelper(getContext());
+        return true;
     }
 
     @Override
@@ -125,9 +137,12 @@ public class MoviesContentProvider extends ContentProvider {
                 returnCursor = db.rawQuery("SELECT * FROM " + MoviesContract.PopularTable.TABLE_NAME
                                 + " WHERE " + MoviesContract.PopularTable._ID + " =" + id,
                         null);
+                Log.i("MoviesContentProvider", "SELECT * FROM " + MoviesContract.PopularTable.TABLE_NAME
+                        + " WHERE " + MoviesContract.PopularTable._ID + " =" + id);
                 break;
             case ALL_POPULAR:
                 returnCursor = db.rawQuery("SELECT * FROM " + MoviesContract.PopularTable.TABLE_NAME, null);
+                Log.i("MoviesContentProvider", "SELECT * FROM " + MoviesContract.PopularTable.TABLE_NAME);
                 break;
 
             case FAVOURITE:
