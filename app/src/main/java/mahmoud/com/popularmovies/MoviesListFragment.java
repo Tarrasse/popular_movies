@@ -44,7 +44,7 @@ import javax.net.ssl.HttpsURLConnection;
 import mahmoud.com.popularmovies.data.MoviesContract;
 import mahmoud.com.popularmovies.modules.MoviesModule;
 
-public class MoviesListFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>{
+public class MoviesListFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String TAG = MoviesListFragment.class.getSimpleName();
     private static final int LOADER_FLAG = 0;
@@ -90,18 +90,18 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
             position = savedInstanceState.getInt(KEY_INSTANCE_STATE_RV_POSITION);
             PreferenceManager.getDefaultSharedPreferences(getContext()).edit().putInt("pos", position).commit();
         }
-        mLayoutManager = new GridLayoutManager(getActivity(), 2);
+        mLayoutManager = new GridLayoutManager(getActivity(), calculateNoOfColumns(getContext()));
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.getLayoutManager().scrollToPosition(position);
 
-        getLoaderManager().initLoader(LOADER_FLAG, null,this);
+        getLoaderManager().initLoader(LOADER_FLAG, null, this);
         return rootView;
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        Log.i(TAG,"resume " + String.valueOf(position));
+        Log.i(TAG, "resume " + String.valueOf(position));
     }
 
     @Override
@@ -114,7 +114,7 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        int i = ((LinearLayoutManager)mRecyclerView.getLayoutManager()).findFirstCompletelyVisibleItemPosition();
+        int i = ((LinearLayoutManager) mRecyclerView.getLayoutManager()).findFirstCompletelyVisibleItemPosition();
         outState.putInt(KEY_INSTANCE_STATE_RV_POSITION, i);
     }
 
@@ -126,7 +126,7 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
                 .getDefaultSharedPreferences(getContext())
                 .getString(Utilty.PREF_SORT_TYPE, Utilty.POPULAR);
 
-        if (type.equals(Utilty.TOP_RATED)){
+        if (type.equals(Utilty.TOP_RATED)) {
             Log.i(TAG, MoviesContract.TopRatedTable.CONTENT_URI.toString());
             return new CursorLoader(getContext(),
                     MoviesContract.TopRatedTable.CONTENT_URI,
@@ -134,7 +134,7 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
                     null,
                     null,
                     null);
-        }else if(type.equals(Utilty.FAVOURITE)){
+        } else if (type.equals(Utilty.FAVOURITE)) {
             Log.i(TAG, MoviesContract.FavouriteTable.CONTENT_URI.toString());
             return new CursorLoader(getContext(),
                     MoviesContract.FavouriteTable.CONTENT_URI,
@@ -142,7 +142,7 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
                     null,
                     null,
                     null);
-        }else {
+        } else {
             Log.i(TAG, MoviesContract.PopularTable.CONTENT_URI.toString());
             return new CursorLoader(getContext(),
                     MoviesContract.PopularTable.CONTENT_URI,
@@ -160,7 +160,11 @@ public class MoviesListFragment extends Fragment implements LoaderManager.Loader
         mlistAdapter.swapCursor(data);
         mlistAdapter.notifyDataSetChanged();
         mRecyclerView.setLayoutManager(mLayoutManager);
-        position = PreferenceManager.getDefaultSharedPreferences(getContext()).getInt("pos", 0);
+        if (getContext() != null) {
+            position = PreferenceManager.getDefaultSharedPreferences(getContext()).getInt("pos", 0);
+            PreferenceManager.getDefaultSharedPreferences(getContext()).edit().putInt("pos", 0).commit();
+        }
+
         Log.i(TAG, String.valueOf(position));
         mRecyclerView.getLayoutManager().scrollToPosition(position);
     }
