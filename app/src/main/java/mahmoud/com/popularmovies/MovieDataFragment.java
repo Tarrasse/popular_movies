@@ -20,6 +20,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.text.TextDirectionHeuristicCompat;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -57,6 +58,7 @@ public class MovieDataFragment extends Fragment {
 
 
     private static final String TAG = MovieDataFragment.class.getSimpleName();
+
     private TextView titleTextView;
     private TextView dateTextView;
     private TextView ratingTextView;
@@ -94,6 +96,7 @@ public class MovieDataFragment extends Fragment {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_movie_data, container, false);
         Bundle args = getArguments();
+
 
         mType = args.getString(Utilty.DATA_FRAGMENT_BUNDLE_SORT_TYPE);
         _id = args.getLong(Utilty.DATA_FRAGMENT_BUNDLE__ID);
